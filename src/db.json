@@ -1,0 +1,44 @@
+{
+  "cards": [
+    {
+      "color": "purple",
+      "flipped": false,
+      "cleared": false
+    },
+    {
+      "color": "blue",
+      "flipped": false,
+      "cleared": false
+    },
+    {
+      "color": "green",
+      "flipped": false,
+      "cleared": false
+    },
+    {
+      "color": "orange",
+      "flipped": false,
+      "cleared": false
+    },
+    {
+      "color": "purple",
+      "flipped": false,
+      "cleared": false
+    },
+    {
+      "color": "blue",
+      "flipped": false,
+      "cleared": false
+    },
+    {
+      "color": "green",
+      "flipped": false,
+      "cleared": false
+    },
+    {
+      "color": "orange",
+      "flipped": false,
+      "cleared": false
+    }
+  ]
+}
