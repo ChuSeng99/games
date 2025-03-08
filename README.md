@@ -28,8 +28,8 @@ npm run dev
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### Start JSON server
 
 ```sh
-npm run lint
+npx json-server ./src/db.json --port 3000
 ```

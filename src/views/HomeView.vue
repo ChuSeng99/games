@@ -2,7 +2,6 @@
 import { ref, onMounted, computed } from 'vue';
 
 const cards = ref([]);
-const flash = ref('');
 
 onMounted(() => {
   fetch('http://localhost:3000/cards')
@@ -24,6 +23,8 @@ const shuffleArray = (array) => {
   return array;
 }
 
+const flash = ref('');
+
 const pause = (milliseconds = 500) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
@@ -34,6 +35,40 @@ const showFlashMessage = async (message, duration = 500) => {
   flash.value = '';
 }
 
+const attempts = ref(0);
+
+const incrementAttempts = () => {
+  attempts.value++;
+}
+
+const currentAttempt = computed(() => {
+  return attempts.value;
+});
+
+// update scoreboard after each round of game 
+// prompt player for next round
+// update menu bar round display 
+
+const rounds = ref([]);
+
+onMounted(() => {
+  const storedRounds = localStorage.getItem('scoreboard');
+  if (storedRounds) {
+    rounds.value = JSON.parse(storedRounds);
+  }
+});
+
+const updateScoreboard = (currentRound, points) => {
+  const round = { round: currentRound, points };
+  rounds.value.push(round);
+
+  localStorage.setItem('scoreboard', JSON.stringify(rounds.value));
+}
+
+const currentRound = computed(() => {
+  return rounds.value.length + 1;
+});
+
 const flipCard = async (card) => {
   card.flipped = !card.flipped;
 
@@ -43,9 +78,12 @@ const flipCard = async (card) => {
     flippedCards.value.forEach(card => card.cleared = true);
 
     if (! remainingCards.value.length) {
-      await showFlashMessage('You won!', 2000);
+      updateScoreboard(currentRound, points);
+      await showFlashMessage('You won!');
     }
   }
+
+  incrementAttempts();
 
   await pause();
 
@@ -69,7 +107,7 @@ const hasMatch = computed(() => {
 });
 
 const points = computed(() => {
-  return clearedCards.value.length;
+  return clearedCards.value.length - currentAttempt.value;
 });
 
 const restartGame = () => {
@@ -80,8 +118,8 @@ const restartGame = () => {
 <template>
   <main class="min-h-screen px-10">
 
-    <!-- Points & Restart -->
-    <div class="p-10 mb-10 font-bold flex justify-center gap-8">
+    <!-- Display Bar -->
+    <div class="p-10 mb-10 font-bold flex justify-center items-baseline gap-8">
       <div>
         <span
           class="text-3xl text-blue-700"
@@ -90,12 +128,26 @@ const restartGame = () => {
         <span class="text-xs">pts</span>
       </div>
 
-      <span>
-        <button 
-          @click="restartGame"
-          class="bg-blue-700 py-2 px-4 rounded-md text-white"
-        >Restart</button>
-      </span>
+      <div>
+        <span>Attempt: </span>
+        <span
+          class="text-3xl text-blue-700"
+          v-text="currentAttempt"
+        ></span>
+      </div>
+
+      <div>
+        <span>Round: </span>
+        <span
+          class="text-3xl text-blue-700"
+          v-text="currentRound"
+        ></span>
+      </div>
+
+      <button
+        @click="restartGame"
+        class="bg-blue-700 py-2 px-4 rounded-md text-white"
+      >Restart</button>
     </div>
 
     <!-- Cards -->
@@ -111,6 +163,23 @@ const restartGame = () => {
           @click="flipCard(card)"
         ></button>
       </div>
+    </div>
+
+    <!-- Scoreboard -->
+    <div class="mt-10">
+      <h2 class="mb-2">Scoreboard</h2>
+      <ul
+        v-if="rounds.length > 0"
+        class="flex flex-col w-1/4"
+      >
+        <li
+          v-for="(round, index) in rounds"
+          :key="index"
+          class="border border-gray-300 px-2 py-3"
+        >
+          Round {{ parseInt(round.round) - 1 }}: {{ round.points }} points
+        </li>
+      </ul>
     </div>
 
     <!-- flash message -->
